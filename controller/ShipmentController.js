@@ -42,6 +42,13 @@ exports.createShipment = async (req, res, next) => {
       service_type,
       origin,
       destination,
+      receiver_details,
+      // New fields to destructure
+      type_of_shipment,
+      weight,
+      product,
+      payment_method, 
+      // End New fields
       estimated_delivery,
       shipment_value,
       current_location,
@@ -50,8 +57,12 @@ exports.createShipment = async (req, res, next) => {
       progress,
     } = req.body;
 
-    if (!tracking_id || !origin || !destination) {
-      return res.status(400).json({ error: 'tracking_id, origin and destination are required' });
+    // Updated validation to require the new specification fields
+    if (!tracking_id || !origin || !destination || !receiver_details || 
+        !type_of_shipment || weight === undefined || !product) { // weight check needs to handle 0
+      return res.status(400).json({ 
+        error: 'tracking_id, origin, destination, receiver_details, type_of_shipment, weight, and product are required' 
+      });
     }
 
     const existing = await Shipment.findOne({ tracking_id });
@@ -62,6 +73,14 @@ exports.createShipment = async (req, res, next) => {
       service_type,
       origin,
       destination,
+      receiver_details,
+      
+      // Save the new specifications
+      type_of_shipment,
+      weight,
+      product,
+      payment_method, // payment_method has a default in the schema, but can be set here
+      
       estimated_delivery: estimated_delivery ? new Date(estimated_delivery) : undefined,
       shipment_value,
       current_location,
